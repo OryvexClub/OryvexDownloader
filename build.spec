@@ -2,21 +2,22 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import os
+from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 
-# Collect bundled binaries
-bundled_binaries = []
+# Define bundled tools
+bundled_files = []
 if os.path.exists('bundled/ffmpeg.exe'):
-    bundled_binaries.append(('bundled/ffmpeg.exe', '.'))
+    bundled_files.append(('bundled/ffmpeg.exe', '.'))
 if os.path.exists('bundled/deno.exe'):
-    bundled_binaries.append(('bundled/deno.exe', '.'))
+    bundled_files.append(('bundled/deno.exe', '.'))
 
 a = Analysis(
     ['down.py'],
     pathex=[],
-    binaries=bundled_binaries,  # <--- Bundled FFmpeg + Deno
-    datas=[],
+    binaries=[],
+    datas=bundled_files,  # <--- Use datas to copy them to the root of the dist folder
     hiddenimports=[
         'PySide6', 'PySide6.QtCore', 'PySide6.QtGui', 'PySide6.QtWidgets',
         'yt_dlp', 'yt_dlp.extractor', 'yt_dlp.postprocessor', 'yt_dlp.downloader',
@@ -61,7 +62,7 @@ coll = COLLECT(
     exe,
     a.binaries,
     a.zipfiles,
-    a.datas,
+    a.datas,  # <--- This includes our ffmpeg.exe and deno.exe
     strip=False,
     upx=True,
     upx_exclude=[],
