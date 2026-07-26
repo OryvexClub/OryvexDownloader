@@ -29,6 +29,7 @@ jobs:
         pyinstaller build.spec --clean
 
     - name: Verify EXE creation
+      shell: pwsh
       run: |
         if (-Not (Test-Path "dist\OryvexDownloader\OryvexDownloader.exe")) {
           throw "EXE file not found!"
@@ -38,11 +39,10 @@ jobs:
     - name: Setup Inno Setup
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
       with:
-        path: installer.iss # نام فایل اسکریپت اینو ستاپ شما
+        path: installer.iss
 
     - name: Compile Installer
-      run: |
-        iscc installer.iss
+      run: iscc installer.iss
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
