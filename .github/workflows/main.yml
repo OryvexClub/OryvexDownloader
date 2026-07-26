@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # Required to create releases and upload assets
+  contents: write
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # Fetch all history for tagging
+        fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -29,6 +29,34 @@ jobs:
         python -m pip install --upgrade pip
         pip install PySide6 requests yt-dlp yt-dlp-ejs beautifulsoup4 instaloader pyinstaller
 
+    # --- DOWNLOAD FFMPEG & DENO ---
+    - name: Download FFmpeg
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Force -Path bundled
+        Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile "ffmpeg.zip"
+        Expand-Archive -Path "ffmpeg.zip" -DestinationPath "ffmpeg_extracted"
+        $ffmpegExe = Get-ChildItem -Path "ffmpeg_extracted" -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1
+        Copy-Item $ffmpegExe.FullName -Destination "bundled\ffmpeg.exe"
+        Remove-Item "ffmpeg.zip", "ffmpeg_extracted" -Recurse -Force
+        Write-Host "FFmpeg downloaded: $(Get-Item bundled\ffmpeg.exe | Select-Object -ExpandProperty Length) bytes"
+
+    - name: Download Deno
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip" -OutFile "deno.zip"
+        Expand-Archive -Path "deno.zip" -DestinationPath "bundled"
+        Remove-Item "deno.zip" -Force
+        Write-Host "Deno downloaded: $(Get-Item bundled\deno.exe | Select-Object -ExpandProperty Length) bytes"
+
+    - name: Verify bundled tools
+      shell: pwsh
+      run: |
+        if (-Not (Test-Path "bundled\ffmpeg.exe")) { throw "ffmpeg.exe not found!" }
+        if (-Not (Test-Path "bundled\deno.exe")) { throw "deno.exe not found!" }
+        Write-Host "All bundled tools ready."
+
+    # --- BUILD ---
     - name: Build EXE with PyInstaller
       run: |
         pyinstaller build.spec --clean
@@ -39,7 +67,13 @@ jobs:
         if (-Not (Test-Path "dist\OryvexDownloader\OryvexDownloader.exe")) {
           throw "EXE file not found!"
         }
-        Write-Host "EXE created successfully."
+        if (-Not (Test-Path "dist\OryvexDownloader\ffmpeg.exe")) {
+          throw "Bundled ffmpeg.exe not found in dist!"
+        }
+        if (-Not (Test-Path "dist\OryvexDownloader\deno.exe")) {
+          throw "Bundled deno.exe not found in dist!"
+        }
+        Write-Host "EXE + bundled tools created successfully."
 
     - name: Setup Inno Setup
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
@@ -49,21 +83,11 @@ jobs:
     - name: Compile Installer
       run: iscc installer.iss
 
-    - name: Verify Installer creation
-      shell: pwsh
-      run: |
-        $files = Get-ChildItem -Path "dist" -Filter "*.exe"
-        if ($files.Count -eq 0) {
-          throw "Installer exe not found in dist folder!"
-        }
-        Write-Host "Installer created: $($files[0].Name)"
-
-    # --- RELEASE STEPS START HERE ---
-
+    # --- RELEASE ---
     - name: Generate Tag Name
       id: tag
+      shell: pwsh
       run: |
-        # If triggered by a tag, use it. Otherwise, create a nightly build tag based on date/commit
         if ("${{ github.ref }}" -like "refs/tags/*") {
           echo "name=${{ github.ref_name }}" >> $env:GITHUB_OUTPUT
         } else {
@@ -73,7 +97,6 @@ jobs:
         }
 
     - name: Create GitHub Release
-      id: create_release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.tag.outputs.name }}
@@ -81,11 +104,14 @@ jobs:
         body: |
           Automated build of Oryvex Media Downloader.
           
-          **Changes:**
-          - Auto-built from commit ${{ github.sha }}
-          - Includes latest dependencies
+          **What's included:**
+          - FFmpeg (bundled — no separate install needed)
+          - Deno JS Runtime (bundled — no separate install needed)
+          - All Python dependencies
+          
+          Built from commit `${{ github.sha }}`
         draft: false
-        prerelease: false # Set to true if you want it marked as Pre-release
+        prerelease: false
         generate_release_notes: true
         files: |
           dist/*.exe
