@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Oryvex Media Downloader — GUI Edition (FULLY FIXED v3.9.4)
+Oryvex Media Downloader — GUI Edition (FULLY FIXED v1.0.0)
 ============================================================
 YouTube · Spotify · SoundCloud · TikTok · Instagram · Twitter/X · Pinterest · RadioJavan
 
-CHANGELOG v3.9.4 (guaranteed cleanup on cancel):
+CHANGELOG v1.0.0 (guaranteed cleanup on cancel):
   - Uses a unique temporary filename prefix for each download attempt.
   - On cancellation, all files with that prefix (including .part/.ytdl variants) are deleted.
   - No more "old files" left behind when cancelling.
@@ -31,7 +31,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import unquote
 
-VERSION = "3.9.4-gui"
+VERSION = "1.0.0-gui"
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
@@ -714,7 +714,7 @@ class FormatSelectionDialog(QDialog):
 
 
 # ══════════════════════════════════════════════════════════════════════════
-#  YouTube Downloader — v3.9.4 (guaranteed cleanup on cancel)
+#  YouTube Downloader — v1.0.0 (guaranteed cleanup on cancel)
 # ══════════════════════════════════════════════════════════════════════════
 
 class YouTubeDownloader(Downloader):
