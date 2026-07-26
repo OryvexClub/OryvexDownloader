@@ -1,0 +1,51 @@
+name: Build Windows Installer
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install PySide6 requests yt-dlp yt-dlp-ejs beautifulsoup4 instaloader pyinstaller
+
+    - name: Build EXE with PyInstaller
+      run: |
+        pyinstaller build.spec --clean
+
+    - name: Verify EXE creation
+      run: |
+        if (-Not (Test-Path "dist\OryvexDownloader\OryvexDownloader.exe")) {
+          throw "EXE file not found!"
+        }
+        Write-Host "EXE created successfully."
+
+    - name: Setup Inno Setup
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      with:
+        path: installer.iss # نام فایل اسکریپت اینو ستاپ شما
+
+    - name: Compile Installer
+      run: |
+        iscc installer.iss
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Oryvex-Installer
+        path: dist/*.exe
