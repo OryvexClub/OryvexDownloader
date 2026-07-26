@@ -59,23 +59,22 @@ jobs:
         }
         Remove-Item "deno.zip" -Force
 
-    - name: Verify Bundled Tools Exist Before Build
-      shell: pwsh
-      run: |
-        if (-Not (Test-Path "bundled\ffmpeg.exe")) { throw "bundled\ffmpeg.exe missing!" }
-        if (-Not (Test-Path "bundled\deno.exe")) { throw "bundled\deno.exe missing!" }
-        Write-Host "All bundled tools ready for PyInstaller."
-
-    # --- BUILD ---
+    # --- BUILD EXE ---
     - name: Build EXE with PyInstaller
       run: |
         pyinstaller build.spec --clean
 
-    - name: List Dist Contents
+    # --- MANUALLY COPY BINARIES TO DIST ---
+    - name: Copy Bundled Tools to Dist
       shell: pwsh
       run: |
-        Write-Host "--- Contents of dist\OryvexDownloader ---"
-        Get-ChildItem -Path "dist\OryvexDownloader" | Format-Table Name, Length
+        $distPath = "dist\OryvexDownloader"
+        if (-Not (Test-Path $distPath)) {
+          throw "Dist folder not found!"
+        }
+        Copy-Item "bundled\ffmpeg.exe" -Destination $distPath
+        Copy-Item "bundled\deno.exe" -Destination $distPath
+        Write-Host "Copied ffmpeg.exe and deno.exe to $distPath"
 
     - name: Verify Final Output
       shell: pwsh
@@ -85,10 +84,10 @@ jobs:
           throw "OryvexDownloader.exe not found in $distPath"
         }
         if (-Not (Test-Path "$distPath\ffmpeg.exe")) {
-          throw "ffmpeg.exe not found in $distPath. Check build.spec datas configuration."
+          throw "ffmpeg.exe not found in $distPath"
         }
         if (-Not (Test-Path "$distPath\deno.exe")) {
-          throw "deno.exe not found in $distPath. Check build.spec datas configuration."
+          throw "deno.exe not found in $distPath"
         }
         Write-Host "Verification successful: EXE, ffmpeg, and deno are present."
 
