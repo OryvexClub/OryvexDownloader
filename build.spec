@@ -1,4 +1,3 @@
-# build.spec
 # -*- mode: python ; coding: utf-8 -*-
 
 block_cipher = None
@@ -9,30 +8,13 @@ a = Analysis(
     binaries=[],
     datas=[],
     hiddenimports=[
-        'PySide6',
-        'PySide6.QtCore',
-        'PySide6.QtGui',
-        'PySide6.QtWidgets',
-        'yt_dlp',
-        'yt_dlp.extractor',
-        'yt_dlp.postprocessor',
-        'yt_dlp.downloader',
-        'requests',
-        'bs4',
-        'instaloader',
-        'urllib3',
-        'certifi',
-        'charset_normalizer',
-        'idna',
-        'socks',
-        'websockets',
-        'mutagen',
-        'pycryptodomex',
-        'brotli',
-        'secretstorage',
-        'keyring',
-        'jeepney',
-        'dbus_fast',
+        'PySide6', 'PySide6.QtCore', 'PySide6.QtGui', 'PySide6.QtWidgets',
+        'yt_dlp', 'yt_dlp.extractor', 'yt_dlp.postprocessor', 'yt_dlp.downloader',
+        'yt_dlp_ejs',
+        'requests', 'bs4', 'instaloader',
+        'urllib3', 'certifi', 'charset_normalizer', 'idna',
+        'socks', 'websockets', 'mutagen', 'pycryptodomex', 'brotli',
+        'secretstorage', 'keyring', 'jeepney', 'dbus_fast'
     ],
     hookspath=[],
     hooksconfig={},
@@ -56,7 +38,7 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False, # چون برنامه GUI است، کنسول مخفی باشد
+    console=False, # Hides the console window for GUI apps
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

@@ -2,7 +2,7 @@
 AppName=Oryvex Media Downloader
 AppVersion=3.9.4
 DefaultDirName={autopf}\OryvexDownloader
-DefaultGroupName=Oryvex
+DefaultGroupName=OryvexDownloader
 OutputDir=dist
 OutputBaseFilename=OryvexDownloader-Setup
 Compression=lzma
