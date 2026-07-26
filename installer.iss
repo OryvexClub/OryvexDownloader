@@ -7,8 +7,8 @@ OutputDir=dist
 OutputBaseFilename=OryvexDownloader-Setup
 Compression=lzma
 SolidCompression=yes
-SetupIconFile=app_icon.ico ; <--- ADD THIS LINE
-UninstallDisplayIcon={app}\OryvexDownloader.exe ; <--- ADD THIS LINE
+SetupIconFile=app_icon.ico
+UninstallDisplayIcon={app}\OryvexDownloader.exe
 
 [Files]
 Source: "dist\OryvexDownloader\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

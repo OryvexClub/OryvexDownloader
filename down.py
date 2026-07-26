@@ -70,6 +70,23 @@ def ensure_node_in_path():
         if os.path.exists(path) and path not in os.environ.get("PATH", ""):
             os.environ["PATH"] = path + os.pathsep + os.environ.get("PATH", "")
 
+
+def ensure_bundled_tools_in_path():
+    """If running as a frozen EXE, add the EXE's directory to PATH
+    so that bundled ffmpeg.exe and deno.exe are found automatically."""
+    if getattr(sys, "frozen", False):
+        # PyInstaller puts everything in sys._MEIPASS (onefile) 
+        # or next to the exe (onedir / COLLECT mode)
+        exe_dir = os.path.dirname(sys.executable)
+        if exe_dir not in os.environ.get("PATH", ""):
+            os.environ["PATH"] = exe_dir + os.pathsep + os.environ.get("PATH", "")
+        # Also check _MEIPASS for onefile mode
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass and meipass not in os.environ.get("PATH", ""):
+            os.environ["PATH"] = meipass + os.pathsep + os.environ.get("PATH", "")
+
+ensure_bundled_tools_in_path()
+
 ensure_node_in_path()
 
 if not getattr(sys, "frozen", False):

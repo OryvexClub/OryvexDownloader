@@ -1,12 +1,21 @@
 # build.spec
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+
 block_cipher = None
+
+# Collect bundled binaries
+bundled_binaries = []
+if os.path.exists('bundled/ffmpeg.exe'):
+    bundled_binaries.append(('bundled/ffmpeg.exe', '.'))
+if os.path.exists('bundled/deno.exe'):
+    bundled_binaries.append(('bundled/deno.exe', '.'))
 
 a = Analysis(
     ['down.py'],
     pathex=[],
-    binaries=[],
+    binaries=bundled_binaries,  # <--- Bundled FFmpeg + Deno
     datas=[],
     hiddenimports=[
         'PySide6', 'PySide6.QtCore', 'PySide6.QtGui', 'PySide6.QtWidgets',
@@ -45,7 +54,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='app_icon.ico', # <--- ADD THIS LINE
+    icon='app_icon.ico',
 )
 
 coll = COLLECT(
