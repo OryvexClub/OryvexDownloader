@@ -1,18 +1,4 @@
-#!/usr/bin/env python3
-"""
-Oryvex Media Downloader — GUI Edition (FULLY FIXED v1.0.0)
-============================================================
-YouTube · Spotify · SoundCloud · TikTok · Instagram · Twitter/X · Pinterest · RadioJavan
 
-CHANGELOG v1.0.0 (guaranteed cleanup on cancel):
-  - Uses a unique temporary filename prefix for each download attempt.
-  - On cancellation, all files with that prefix (including .part/.ytdl variants) are deleted.
-  - No more "old files" left behind when cancelling.
-
-Run:
-    pip install PySide6 requests yt-dlp yt-dlp-ejs beautifulsoup4 instaloader
-    python down.py
-"""
 
 import importlib
 import json
@@ -2777,7 +2763,6 @@ class DownloadPage(QWidget):
 # ══════════════════════════════════════════════════════════════════════════
 #  Settings Page
 # ══════════════════════════════════════════════════════════════════════════
-
 class SettingsPage(QWidget):
     def __init__(self, config: Config):
         super().__init__()
@@ -2798,6 +2783,8 @@ class SettingsPage(QWidget):
         cl.addWidget(self._section("DOWNLOAD DIRECTORY"))
         dir_row = QHBoxLayout()
         self.dir_input = QLineEdit(str(self.config.download_dir))
+        # فعال کردن فیلد ورودی
+        self.dir_input.setEnabled(True)
         browse_btn = make_secondary_button("Browse…")
         browse_btn.clicked.connect(self._browse_dir)
         dir_row.addWidget(self.dir_input, 1)
@@ -2824,6 +2811,8 @@ class SettingsPage(QWidget):
         self.browser_combo.addItems(
             ["chrome", "firefox", "edge", "brave", "opera", "safari"])
         self.browser_combo.setCurrentText(self.config.browser_name)
+        # فعال کردن کامبوباکس
+        self.browser_combo.setEnabled(True)
         bc_row.addWidget(self.browser_checkbox, 1)
         bc_row.addWidget(self.browser_combo)
         cl.addLayout(bc_row)
@@ -2872,7 +2861,10 @@ class SettingsPage(QWidget):
 
     @staticmethod
     def _spin(lo: int, hi: int, val: int) -> QSpinBox:
-        s = QSpinBox(); s.setRange(lo, hi); s.setValue(val); return s
+        s = QSpinBox(); s.setRange(lo, hi); s.setValue(val)
+        # فعال کردن اسپین‌باکس
+        s.setEnabled(True)
+        return s
 
     @staticmethod
     def _labeled(text: str, widget: QWidget) -> QVBoxLayout:
@@ -2904,8 +2896,6 @@ class SettingsPage(QWidget):
             print_error(f"Failed to save settings: {e}")
             SweetAlert.show("error", "Could not save settings", str(e),
                             parent=self.window())
-
-
 # ══════════════════════════════════════════════════════════════════════════
 #  Cookies Page
 # ══════════════════════════════════════════════════════════════════════════
