@@ -30,50 +30,67 @@ jobs:
         pip install PySide6 requests yt-dlp yt-dlp-ejs beautifulsoup4 instaloader pyinstaller
 
     # --- DOWNLOAD FFMPEG & DENO ---
+    - name: Create Bundled Folder
+      run: New-Item -ItemType Directory -Force -Path bundled
+
     - name: Download FFmpeg
       shell: pwsh
       run: |
-        New-Item -ItemType Directory -Force -Path bundled
         Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile "ffmpeg.zip"
         Expand-Archive -Path "ffmpeg.zip" -DestinationPath "ffmpeg_extracted"
         $ffmpegExe = Get-ChildItem -Path "ffmpeg_extracted" -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1
-        Copy-Item $ffmpegExe.FullName -Destination "bundled\ffmpeg.exe"
+        if ($ffmpegExe) {
+          Copy-Item $ffmpegExe.FullName -Destination "bundled\ffmpeg.exe"
+          Write-Host "FFmpeg downloaded successfully."
+        } else {
+          throw "Could not find ffmpeg.exe in the extracted archive."
+        }
         Remove-Item "ffmpeg.zip", "ffmpeg_extracted" -Recurse -Force
-        Write-Host "FFmpeg downloaded: $(Get-Item bundled\ffmpeg.exe | Select-Object -ExpandProperty Length) bytes"
 
     - name: Download Deno
       shell: pwsh
       run: |
         Invoke-WebRequest -Uri "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip" -OutFile "deno.zip"
         Expand-Archive -Path "deno.zip" -DestinationPath "bundled"
+        if (Test-Path "bundled\deno.exe") {
+          Write-Host "Deno downloaded successfully."
+        } else {
+          throw "deno.exe not found after extraction."
+        }
         Remove-Item "deno.zip" -Force
-        Write-Host "Deno downloaded: $(Get-Item bundled\deno.exe | Select-Object -ExpandProperty Length) bytes"
 
-    - name: Verify bundled tools
+    - name: Verify Bundled Tools Exist Before Build
       shell: pwsh
       run: |
-        if (-Not (Test-Path "bundled\ffmpeg.exe")) { throw "ffmpeg.exe not found!" }
-        if (-Not (Test-Path "bundled\deno.exe")) { throw "deno.exe not found!" }
-        Write-Host "All bundled tools ready."
+        if (-Not (Test-Path "bundled\ffmpeg.exe")) { throw "bundled\ffmpeg.exe missing!" }
+        if (-Not (Test-Path "bundled\deno.exe")) { throw "bundled\deno.exe missing!" }
+        Write-Host "All bundled tools ready for PyInstaller."
 
     # --- BUILD ---
     - name: Build EXE with PyInstaller
       run: |
         pyinstaller build.spec --clean
 
-    - name: Verify EXE creation
+    - name: List Dist Contents
       shell: pwsh
       run: |
-        if (-Not (Test-Path "dist\OryvexDownloader\OryvexDownloader.exe")) {
-          throw "EXE file not found!"
+        Write-Host "--- Contents of dist\OryvexDownloader ---"
+        Get-ChildItem -Path "dist\OryvexDownloader" | Format-Table Name, Length
+
+    - name: Verify Final Output
+      shell: pwsh
+      run: |
+        $distPath = "dist\OryvexDownloader"
+        if (-Not (Test-Path "$distPath\OryvexDownloader.exe")) {
+          throw "OryvexDownloader.exe not found in $distPath"
         }
-        if (-Not (Test-Path "dist\OryvexDownloader\ffmpeg.exe")) {
-          throw "Bundled ffmpeg.exe not found in dist!"
+        if (-Not (Test-Path "$distPath\ffmpeg.exe")) {
+          throw "ffmpeg.exe not found in $distPath. Check build.spec datas configuration."
         }
-        if (-Not (Test-Path "dist\OryvexDownloader\deno.exe")) {
-          throw "Bundled deno.exe not found in dist!"
+        if (-Not (Test-Path "$distPath\deno.exe")) {
+          throw "deno.exe not found in $distPath. Check build.spec datas configuration."
         }
-        Write-Host "EXE + bundled tools created successfully."
+        Write-Host "Verification successful: EXE, ffmpeg, and deno are present."
 
     - name: Setup Inno Setup
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
