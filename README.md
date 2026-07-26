@@ -2,7 +2,7 @@
 
 **Oryvex Media Downloader** is a powerful, modern, and lightweight GUI application designed to extract and download high-quality media from the internet. Built with a sleek dark-glass interface, it provides a seamless experience for downloading videos, audio, and images from multiple popular platforms.
 
-![Version](https://img.shields.io/badge/Version-3.9.4-blue)
+![Version](https://img.shields.io/badge/Version-1.0.0-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows%2010/11-lightgrey)
 ![Status](https://img.shields.io/badge/Status-Stable-green)
 
