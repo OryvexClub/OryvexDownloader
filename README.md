@@ -112,4 +112,4 @@ YouTube aggressively throttles downloads and hides high-quality formats if you a
 
 ---
 
-**© 2024 Oryvex Team. All Rights Reserved.**
+**© 2026 Oryvex Team. All Rights Reserved.**
